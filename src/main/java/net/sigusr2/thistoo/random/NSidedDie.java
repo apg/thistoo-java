@@ -12,7 +12,7 @@ public class NSidedDie implements Die {
 	}
 
 	/**
-	 * Fairly rolls an n-sided die
+	 * Fairly rolls an n-sided die, provided the Random source is fair
 	 */
 	public int roll() {
 		return source.nextInt(sides) + 1;

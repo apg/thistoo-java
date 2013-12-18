@@ -16,7 +16,7 @@ import java.util.TreeMap;
  *
  */
 public class DicewareWordList implements WordList {
-	private static int DICEWARE_WORD_LIST_SIZE = 7776;
+	public final static int DICEWARE_WORD_LIST_SIZE = 7776;
 
 	public enum Lang {
 		EN("en"),
@@ -61,21 +61,20 @@ public class DicewareWordList implements WordList {
 	 * a simple array lookup.
 	 */
 	public String get(String key) {
-		if (!initialized) {
-			try {
-				init();
-			}
-			catch (IOException e) {
-				throw new RuntimeException("Word list could not be read: " +
-																	 e.toString());
-			}
+		try {
+			init();
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Word list could not be read: " +
+																 e.toString());
 		}
 
 		byte bytes[] = key.getBytes();
 		if (bytes.length != 5) {
-			throw new AssertionError("Got more than 5 digits");
+			throw new RuntimeException("Got more than 5 digits");
 		}
 
+		// Decrement, to make it base 6.
 		for (int i = 0; i < bytes.length; i++) {
 			if (bytes[i] <= '6' && bytes[i] >= '1') {
 				bytes[i] -= 1;
@@ -91,6 +90,10 @@ public class DicewareWordList implements WordList {
 	}
 
 	private void init() throws IOException {
+		if (initialized) {
+			return;
+		}
+
 		int lineno = 0;
 		final String fileName = "/diceware." + language.code() + ".list";
 		final URL resource = getClass().getResource(fileName);
@@ -101,7 +104,7 @@ public class DicewareWordList implements WordList {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
 		String line = reader.readLine();
-		while (line != null) {
+		while (line != null && lineno < DICEWARE_WORD_LIST_SIZE) {
 			String bits[] = line.split(" ");
 			if (bits.length == 2) {
 				words[lineno] = bits[1];
